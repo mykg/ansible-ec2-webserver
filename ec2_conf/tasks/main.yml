@@ -1,0 +1,55 @@
+---
+# tasks file for webserver_aws
+
+  - name: include access/secret key aws
+    include_vars: /root/ansible_tasks/task2/key.yml
+
+  - name: creating key pair
+    amazon.aws.ec2_key:
+      name: "{{ key_pair_name }}"
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      region: "{{ region }}"
+    register: keypair
+
+  - debug:
+      var: keypair
+
+  - copy:
+      content: '{{ keypair["key"]["private_key"] }}'
+      dest: /root/ansible_tasks/task2/{{ key_pair_name }}.pem
+    ignore_errors: yes
+
+  - name: create security group for our instance
+    amazon.aws.ec2_group:
+      name: "{{ sg_name }}"
+      description: "sg having 22 and 80 ingress"
+      vpc_id: "{{ vpc_id }}"
+      region: "{{ region }}"
+      aws_secret_key: "{{ access_key }}"
+      aws_access_key: "{{ secret_key }}"
+      state: present
+      rules:
+        - proto: tcp
+          from_port: 80
+          to_port: 80
+          cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          from_port: 22
+          to_port: 22
+          cidr_ip: 0.0.0.0/0
+
+
+  - name: lauching an ec2 instance  
+    ec2_instance:
+      region: "{{ region }}"
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      instance_type: "{{ instance_type }}"
+      key_name: "{{ key_pair_name }}"
+      state: present
+      image_id: "{{ image_id }}"
+      vpc_subnet_id: "{{ subnet_id }}"
+      group: "{{ sg_name }}"
+      name: "{{ instance_name }}"
+      assign_public_ip: yes

@@ -1,0 +1,10 @@
+---
+# vars file for webserver_aws
+region: ap-south-1
+instance_type: t2.micro
+image_id: ami-0a9d27a9f4f5c0efc
+key_pair_name: ansiblekeypair
+instance_name: webserver
+vpc_id: vpc-a2809dca
+sg_name: sg_ansible
+subnet_id: subnet-9edee4f6

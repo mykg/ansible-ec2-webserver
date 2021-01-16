@@ -1,0 +1,5 @@
+---
+# vars file for ec2_webserver
+region: ap-south-1
+src: /root/ansible_tasks/task2/ec2_webserver/files/index.html
+dest: /var/www/html/index.html

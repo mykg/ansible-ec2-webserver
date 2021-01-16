@@ -1,0 +1,36 @@
+---
+# tasks file for ec2_webserver
+
+- name: include access/secret key aws
+  include_vars: /root/ansible_tasks/task2/key.yml
+
+- name: retrive facts
+  ec2_instance_info:
+    aws_access_key: "{{ access_key }}"
+    aws_secret_key: "{{ secret_key }}"
+    region: "{{ region }}"
+  register: instfacts
+
+- debug:
+    var: instfacts
+
+- name: install httpd
+  package:
+    name: "httpd"
+    state: present
+  when: ansible_os_family == "RedHat"
+  register: httpd_status
+
+- name: start httpd service
+  service:
+    name: "httpd"
+    state: started
+
+- name: copy webpage to root
+  copy:
+    src: "{{ src }}"
+    dest: "{{ dest }}"
+    mode: 0666
+    when: httpd_status.rc == 0
+    notify: restart httpd 
+
